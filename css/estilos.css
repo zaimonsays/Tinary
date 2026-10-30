@@ -182,6 +182,48 @@ html.lenis,html.lenis body{height:auto}
 .js .hero__linea-in{transform:translateY(130%);animation:lineaRescate 0s 6s forwards}
 @keyframes lineaRescate{to{transform:none}}
 
+/* ===== Portada con recorrido (escritorio): los clips avanzan con el scroll =====
+   Solo con JS y sin "menos movimiento" (clase .hv en <html>); si no, queda la portada de siempre. */
+.rv{display:none}
+@media (min-width:960px){
+  .hv .hero{display:none}
+  .hv .rv{display:block}
+}
+.rv{position:relative;height:100vh;height:100svh;overflow:clip;background:#040504;color:var(--bg)}
+.rv__escenario{position:relative;height:100%}
+.rv__medios{position:absolute;inset:0;z-index:0}
+.rv__video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#040504}
+.rv__video--recorrido{opacity:0;transition:opacity .25s linear}
+.rv__escena{position:absolute;inset:0;z-index:1;display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:48px;
+  max-width:var(--maxw);margin-inline:auto;padding:var(--nav-h) var(--gutter) 110px;pointer-events:none}
+.rv__texto{display:grid;justify-items:start;max-width:min(36vw,540px);pointer-events:auto}
+.rv__escena--der .rv__texto{grid-column:2;justify-self:end}
+.rv__titulo{margin:18px 0 0;font-weight:600;font-size:clamp(3rem,4.9vw,5rem);line-height:.98;letter-spacing:-.045em}
+.rv__titulo--portada{font-size:min(calc((min(100vw,var(--maxw)) - 2 * var(--gutter) - 48px) * .528 / 6.15),6.6rem)}
+.rv__linea{display:block;overflow:hidden;padding:.15em .12em .15em 0;margin:-.15em -.12em -.15em 0}
+.rv__linea-in{display:block}
+.rv__acento{color:var(--brand)}
+.rv__bajada{max-width:32ch;margin-top:26px;font-size:clamp(1rem,.94rem + .3vw,1.18rem);line-height:1.55;color:var(--muted-dark)}
+.rv__acciones{margin-top:34px}
+.rv .ceja{color:var(--teal)}
+.rv__indice{position:absolute;z-index:2;left:50%;bottom:34px;translate:-50% 0;display:flex;gap:clamp(18px,3vw,44px);
+  width:calc(min(100%,var(--maxw)) - 2 * var(--gutter));margin:0;padding:18px 0 0;list-style:none;border-top:1px solid rgba(242,242,242,.14);
+  font:500 .7rem/1 var(--font-mono);letter-spacing:.1em;text-transform:uppercase;color:rgba(242,242,242,.42)}
+.rv__indice li{display:flex;gap:.8em;transition:color .4s var(--ease)}
+.rv__indice b{font-weight:500;color:var(--brand)}
+.rv__indice li.is-activo{color:var(--bg)}
+.rv__pista{position:absolute;z-index:2;right:var(--gutter);bottom:34px;display:flex;align-items:center;gap:12px;margin:0;
+  font:500 .7rem/1 var(--font-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted-dark)}
+@media (min-width:1408px){ .rv__pista{right:calc((100vw - var(--maxw)) / 2 + var(--gutter))} }
+.rv__pista-linea{position:relative;width:1px;height:28px;overflow:hidden;background:rgba(242,242,242,.18)}
+.rv__pista-linea::after{content:"";position:absolute;inset:0;background:var(--teal);animation:pista 2.2s var(--ease) infinite}
+@keyframes pista{0%{translate:0 -100%}60%,100%{translate:0 100%}}
+.rv__indice{padding-right:220px}
+/* Escenas 1 a 4 esperan su turno; la 0 entra con la firma (con rescate por tiempo) */
+.js .rv__escena + .rv__escena{visibility:hidden}
+.js .rv__escena:first-of-type [data-rv-ceja],.js .rv__escena:first-of-type [data-rv-resto]{visibility:hidden;animation:rescate 0s 4s forwards}
+.js .rv__escena:first-of-type .rv__linea-in{transform:translateY(130%);animation:lineaRescate 0s 6s forwards}
+
 /* Composición: las capas y el eslabón */
 .arte{position:relative;width:min(100%,600px);aspect-ratio:1;margin-inline:auto}
 .arte__svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}

@@ -24,8 +24,8 @@
 <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
 <link rel="preload" href="fonts/sora-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/jetbrains-mono-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/estilos.css?v=20261028b">
-<script>document.documentElement.className=document.documentElement.className.replace('no-js','js');</script>
+<link rel="stylesheet" href="css/estilos.css?v=20261029a">
+<script>document.documentElement.className=document.documentElement.className.replace('no-js','js');if(!matchMedia('(prefers-reduced-motion: reduce)').matches)document.documentElement.classList.add('hv');</script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"Organization","name":"Tinary","url":"https://tinary.cl/","logo":"https://tinary.cl/img/favicon.svg","email":"contacto@tinary.cl","description":"Ciberseguridad para sitios web, aplicaciones, integraciones y datos de empresas."}
 </script>
@@ -67,6 +67,56 @@
 <!-- ===== FIN Navegación ===== -->
 
 <main id="contenido">
+
+<!-- ===== INICIO Portada con recorrido (solo escritorio; en celular se usa la portada de abajo) ===== -->
+<section class="rv" id="recorrido" aria-label="Portada: lo que protegemos" data-rv>
+  <div class="rv__escenario">
+    <div class="rv__medios" aria-hidden="true">
+      <video class="rv__video" data-rv-intro data-src="video/hero-intro.mp4" data-poster="video/hero-intro.jpg" muted playsinline preload="none"></video>
+      <video class="rv__video rv__video--recorrido" data-rv-video data-src="video/hero-recorrido.mp4" muted playsinline preload="none"></video>
+    </div>
+    <div class="rv__escena rv__escena--izq" data-rv-escena>
+      <div class="rv__texto">
+        <p class="ceja" data-rv-ceja><i class="hoja-punto hoja-punto--vivo"></i>Ciberseguridad para empresas</p>
+        <h1 class="rv__titulo rv__titulo--portada"><span class="rv__linea"><span class="rv__linea-in">Protegemos</span></span><span class="rv__linea"><span class="rv__linea-in">lo que tu</span></span><span class="rv__linea"><span class="rv__linea-in">negocio</span></span><span class="rv__linea"><span class="rv__linea-in rv__acento">conecta.</span></span></h1>
+        <p class="rv__bajada" data-rv-resto>Detectamos las fallas de tus sitios, apps e integraciones, las corregimos contigo y seguimos vigilando.</p>
+        <div class="rv__acciones" data-rv-resto><a class="btn" href="#contacto" data-origen="Portada">Agenda un diagnóstico <svg class="btn__ico" viewBox="0 0 18 12" aria-hidden="true" focusable="false"><path d="M1 6h15M11 1l5 5-5 5"/></svg></a></div>
+      </div>
+    </div>
+    <div class="rv__escena rv__escena--der" data-rv-escena>
+      <div class="rv__texto">
+        <p class="ceja" data-rv-ceja><i class="hoja-punto"></i>01 · Sitios web</p>
+        <h2 class="rv__titulo"><span class="rv__linea"><span class="rv__linea-in">Tu vitrina,</span></span><span class="rv__linea"><span class="rv__linea-in">sin puertas</span></span><span class="rv__linea"><span class="rv__linea-in rv__acento">abiertas.</span></span></h2>
+        <p class="rv__bajada" data-rv-resto>Revisamos formularios, accesos y configuración antes de que un intruso los encuentre.</p>
+      </div>
+    </div>
+    <div class="rv__escena rv__escena--izq" data-rv-escena>
+      <div class="rv__texto">
+        <p class="ceja" data-rv-ceja><i class="hoja-punto"></i>02 · Aplicaciones</p>
+        <h2 class="rv__titulo"><span class="rv__linea"><span class="rv__linea-in">Código</span></span><span class="rv__linea"><span class="rv__linea-in rv__acento">que resiste.</span></span></h2>
+        <p class="rv__bajada" data-rv-resto>Auditamos tu app y las librerías de las que depende, antes de que llegue a tus clientes.</p>
+      </div>
+    </div>
+    <div class="rv__escena rv__escena--der" data-rv-escena>
+      <div class="rv__texto">
+        <p class="ceja" data-rv-ceja><i class="hoja-punto"></i>03 · Integraciones</p>
+        <h2 class="rv__titulo"><span class="rv__linea"><span class="rv__linea-in">Conectados,</span></span><span class="rv__linea"><span class="rv__linea-in rv__acento">no expuestos.</span></span></h2>
+        <p class="rv__bajada" data-rv-resto>Cuidamos cada API y cada flujo entre tu CRM, tu ERP y tus automatizaciones.</p>
+      </div>
+    </div>
+    <div class="rv__escena rv__escena--izq" data-rv-escena>
+      <div class="rv__texto">
+        <p class="ceja" data-rv-ceja><i class="hoja-punto"></i>04 · Datos</p>
+        <h2 class="rv__titulo"><span class="rv__linea"><span class="rv__linea-in">Tus datos,</span></span><span class="rv__linea"><span class="rv__linea-in rv__acento">bajo llave.</span></span></h2>
+        <p class="rv__bajada" data-rv-resto>Protegemos la información de tus clientes y te preparamos para la Ley 21.719.</p>
+        <div class="rv__acciones" data-rv-resto><a class="btn" href="#contacto" data-origen="Portada · Datos">Agenda un diagnóstico <svg class="btn__ico" viewBox="0 0 18 12" aria-hidden="true" focusable="false"><path d="M1 6h15M11 1l5 5-5 5"/></svg></a></div>
+      </div>
+    </div>
+    <ol class="rv__indice" aria-hidden="true"><li data-rv-paso><b>01</b>Sitios web</li><li data-rv-paso><b>02</b>Aplicaciones</li><li data-rv-paso><b>03</b>Integraciones</li><li data-rv-paso><b>04</b>Datos</li></ol>
+    <p class="rv__pista" data-rv-pista aria-hidden="true"><span class="rv__pista-linea"></span>Desliza para recorrer</p>
+  </div>
+</section>
+<!-- ===== FIN Portada con recorrido ===== -->
 
 <!-- ===== INICIO Portada ===== -->
 <section class="hero" id="portada" data-portada>
@@ -568,6 +618,6 @@
 <script src="vendor/ScrollTrigger.min.js" defer></script>
 <script src="vendor/SplitText.min.js" defer></script>
 <script src="vendor/lenis.min.js" defer></script>
-<script src="js/main.js?v=20261028b" defer></script>
+<script src="js/main.js?v=20261029a" defer></script>
 </body>
 </html>

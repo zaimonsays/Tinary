@@ -18,7 +18,7 @@
   const ANCHO = '(min-width: 960px)';
   const ANGOSTO = '(max-width: 959px)';
 
-  if (!hasGSAP) html.classList.remove('js');   // sin GSAP: todo visible y quieto
+  if (!hasGSAP) html.classList.remove('js', 'hv');   // sin GSAP: todo visible y quieto (y la portada de siempre)
   else {
     gsap.registerPlugin(ScrollTrigger);
     if (window.SplitText) gsap.registerPlugin(SplitText);
@@ -75,6 +75,7 @@
   // 3.2 Enlaces internos suaves
   const scrollToEl = (el, instant) => {
     if (lenis) lenis.scrollTo(el, { offset: 0, duration: instant ? 0 : 1.4, immediate: !!instant });
+    else if (typeof el === 'number') window.scrollTo({ top: el, behavior: RM || instant ? 'auto' : 'smooth' });
     else el.scrollIntoView({ behavior: RM || instant ? 'auto' : 'smooth' });
   };
   d.addEventListener('click', (e) => {
@@ -85,7 +86,7 @@
     if (!el) return;
     e.preventDefault();
     prepararFormulario(a);
-    scrollToEl(el);
+    scrollToEl(el.getClientRects().length ? el : 0);   // #portada se oculta en escritorio: ir arriba
     history.replaceState(null, '', hash);
   });
 
@@ -602,6 +603,117 @@
     });
   });
 
+  // 6.15 Portada con recorrido (escritorio): el scroll mueve los clips y cada texto entra y sale con él
+  const recorrido = safe(() => {
+    const sec = $('[data-rv]');
+    if (!sec || !html.classList.contains('hv')) return null;
+    const intro = $('[data-rv-intro]', sec);
+    const video = $('[data-rv-video]', sec);
+    const escenas = $$('[data-rv-escena]', sec);
+    const pasos = $$('[data-rv-paso]', sec);
+    const pista = $('[data-rv-pista]', sec);
+    const CLIP = 5.0833;                         // segundos de cada clip (los 4 van seguidos en un archivo)
+    const T = { inicio: 0.25, clip: 1, pausa: 0.45, entra: 0.55 };   // unidades del recorrido
+    const est = { t: 0 };
+    let listo = false;
+    let introViva = false;
+    let cargado = false;
+    let firma = null;
+    let st = null;
+
+    // Saltos de video sin amontonarse: uno a la vez (receta de scroll-world)
+    let pendiente = false;
+    const buscar = () => {
+      if (!listo) return;
+      if (video.seeking) { pendiente = true; return; }
+      if (Math.abs(video.currentTime - est.t) > 0.02) video.currentTime = est.t;
+    };
+    video.addEventListener('seeked', () => { if (pendiente) { pendiente = false; buscar(); } });
+    const capa = () => { video.style.opacity = listo && (est.t > 0.01 || !introViva) ? 1 : 0; };
+    intro.addEventListener('ended', () => { introViva = false; capa(); });
+
+    // Los videos se piden solo en escritorio. El del recorrido llega entero (Blob) para que siempre se pueda saltar.
+    const cargar = () => {
+      if (cargado) return;
+      cargado = true;
+      intro.poster = intro.dataset.poster;
+      intro.src = intro.dataset.src;
+      fetch(video.dataset.src)
+        .then((r) => (r.ok ? r.blob() : Promise.reject(r.status)))
+        .then((b) => {
+          video.addEventListener('loadeddata', () => { listo = true; buscar(); capa(); }, { once: true });
+          video.src = URL.createObjectURL(b);
+        })
+        .catch((e) => console.warn('[tinary] recorrido', e));
+    };
+
+    const entrada = (e) => gsap.timeline({ defaults: { ease: M.ease } })
+      .fromTo(e, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.01, ease: 'none' }, 0)
+      .fromTo($('[data-rv-ceja]', e), { autoAlpha: 0, y: 10 }, { autoAlpha: 1, y: 0, duration: 0.22 }, 0)
+      .fromTo($$('.rv__linea-in', e), { yPercent: 130 }, { yPercent: 0, duration: 0.3, stagger: 0.04 }, 0.03)
+      .fromTo($$('[data-rv-resto]', e), { autoAlpha: 0, y: M.dist }, { autoAlpha: 1, y: 0, duration: 0.22, stagger: 0.05 }, 0.15);
+    const salida = (e) => gsap.timeline({ defaults: { ease: 'power3.in', immediateRender: false } })
+      .fromTo($$('.rv__linea-in', e), { yPercent: 0 }, { yPercent: -130, duration: 0.22, stagger: 0.03 }, 0)
+      .fromTo([$('[data-rv-ceja]', e), ...$$('[data-rv-resto]', e)], { autoAlpha: 1, y: 0 }, { autoAlpha: 0, y: -12, duration: 0.18 }, 0)
+      .fromTo(e, { autoAlpha: 1 }, { autoAlpha: 0, duration: 0.01, ease: 'none' }, 0.3);
+
+    const marcarPaso = (tiempo) => {
+      let k = 0;
+      for (let i = 1; i < escenas.length; i++) if (tiempo >= T.inicio + (i - 1) * (T.clip + T.pausa) + T.entra) k = i;
+      pasos.forEach((p, i) => p.classList.toggle('is-activo', i === k - 1));
+    };
+
+    gsap.matchMedia().add(ANCHO, () => {
+      if (!cargado && window.scrollY < 2) introViva = true;   // la intro se ve antes que el recorrido
+      cargar();
+      const tl = gsap.timeline({
+        onUpdate: () => { buscar(); capa(); marcarPaso(tl.time()); },   // cada cuadro del scrub, no solo al mover la rueda
+        scrollTrigger: {
+          trigger: sec,
+          start: 'top top',
+          end: () => `+=${Math.round(window.innerHeight * 4.4)}`,
+          pin: true,
+          scrub: 0.6,
+          refreshPriority: 1,
+          onUpdate: (self) => {
+            if (self.progress > 0.002) {
+              if (firma && firma.isActive()) firma.progress(1);   // si bajan durante la firma, el texto ya está puesto
+              if (introViva) { intro.pause(); introViva = false; }
+            }
+          },
+        },
+      });
+      tl.fromTo(pista, { autoAlpha: 1 }, { autoAlpha: 0, duration: 0.2, ease: 'none', immediateRender: false }, 0);
+      for (let k = 1; k < escenas.length; k++) {
+        const s = T.inicio + (k - 1) * (T.clip + T.pausa);
+        tl.fromTo(est, { t: (k - 1) * CLIP }, { t: k * CLIP - 0.05, duration: T.clip, ease: 'none', immediateRender: false }, s)
+          .add(salida(escenas[k - 1]), s + 0.02)
+          .add(entrada(escenas[k]), s + T.entra);
+      }
+      tl.to({}, { duration: T.pausa });          // la última escena se queda un momento antes de soltar
+      st = tl.scrollTrigger;
+      return () => { st = null; intro.pause(); introViva = false; };
+    });
+
+    // La firma de la portada: el texto de la escena 0 entra y el isotipo se forma en el video
+    return {
+      firma: () => {
+        if (!st || st.progress > 0.002) { introViva = false; capa(); return null; }
+        const e = escenas[0];
+        intro.currentTime = 0;
+        const p = intro.play();
+        introViva = true;
+        if (p) p.catch(() => { introViva = false; capa(); });
+        firma = gsap.timeline({ defaults: { ease: M.ease } })
+          .fromTo($('[data-rv-ceja]', e), { autoAlpha: 0, y: 10 }, { autoAlpha: 1, y: 0, duration: M.dur }, 0)
+          .fromTo($$('.rv__linea-in', e), { yPercent: 130 }, { yPercent: 0, duration: 0.95, stagger: 0.09 }, 0.1)
+          .fromTo($$('[data-rv-resto]', e), { autoAlpha: 0, y: M.dist }, { autoAlpha: 1, y: 0, duration: M.dur, stagger: 0.15 }, 0.65);
+        return firma;
+      },
+    };
+  });
+  if (html.classList.contains('hv') && !recorrido) html.classList.remove('hv');   // si algo falló, vuelve la portada de siempre
+
   // ---------- 7. La firma de la portada ----------
   const dibujarCamino = (linea) => {
     const t = gsap.timeline();
@@ -642,6 +754,8 @@
       .fromTo('.hero__acciones', { autoAlpha: 0, y: M.dist }, { autoAlpha: 1, y: 0, duration: M.dur }, 1)
       // 4. el perímetro se extiende hasta el botón
       .add(dibujarCamino(camino), 2.05);
+    const rv = recorrido && recorrido.firma();
+    if (rv) tl.add(rv, 0.2);
     return tl;
   }
 
@@ -665,7 +779,7 @@
   // ---------- 8. Arranque ----------
   const mostrarTodo = () => {
     html.classList.remove('js');
-    gsap.set('.hero__linea-in, [data-hero-in], [data-reveal]', { clearProps: 'transform,opacity,visibility' });
+    gsap.set('.hero__linea-in, [data-hero-in], [data-reveal], .rv__linea-in, [data-rv-ceja], [data-rv-resto]', { clearProps: 'transform,opacity,visibility' });
   };
   const vig = safe(vigilancia);
   Promise.race([d.fonts ? d.fonts.ready : Promise.resolve(), new Promise((r) => setTimeout(r, 1200))])
